@@ -1,84 +1,108 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion"; // For smooth transitions
 
-export default function AuthPage() {
-  const [showSignIn, setShowSignIn] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [UID, setUID] = useState("");
+export default function AuthForm() {
+  const [isLogin, setIsLogin] = useState(true);
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Unique ID submitted:", UID);
-    // Send UID to backend here
+  const generateUID = () => {
+    return Math.floor(100000000000 + Math.random() * 900000000000); // Generate 12-digit number
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      const endpoint = isLogin ? "/api/login" : "/api/signup";
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      console.log("Server Response:", result);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   return (
-    <div 
-      className="flex flex-col items-center justify-center min-h-screen bg-black text-white relative"
-      onClick={() => setShowSignIn(false)}
-    >
-      <div className="absolute top-4 right-4">
-        <Button 
-          className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-300"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowSignIn(true);
-          }}
-        >
-          Sign In
-        </Button>
-      </div>
-      <h1 className="text-5xl font-mono font-bold">DocLoc</h1>
-      <p className="text-xl mt-2">Your Data, Your Control</p>
-      {showSignIn && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={() => setShowSignIn(false)}
-        >
-          <div 
-            className="bg-black border border-white shadow-xl p-6 rounded-2xl w-96"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-2xl font-bold text-center">{isSignUp ? "Sign Up" : "Sign In"}</h2>
-            <p className="text-sm text-center text-gray-400 mb-4">Your Data, Your Control</p>
-            <CardContent>
-              <form className="space-y-4" onSubmit={handleSubmit}>
-                {isSignUp && (
-                  <Input type="text" placeholder="Full Name" className="w-full bg-black text-white border border-white" />
-                )}
-                <Input 
-                  type="text" 
-                  placeholder="12-Digit Unique ID" 
-                  className="w-full bg-black text-white border border-white"
-                  value={UID}
-                  onChange={(e) => setUID(e.target.value)}
-                />
-                <Input type="password" placeholder="Password" className="w-full bg-black text-white border border-white" />
-                {isSignUp && (
-                  <Input type="date" placeholder="Date of Birth" className="w-full bg-black text-white border border-white" />
-                )}
-                {isSignUp && (
-                  <Input type="tel" placeholder="Mobile Number" className="w-full bg-black text-white border border-white" />
-                )}
-                <Button type="submit" className="w-full bg-white text-black hover:bg-gray-300">
-                  {isSignUp ? "Sign Up" : "Sign In"}
-                </Button>
-              </form>
-              <p className="text-center text-sm text-gray-400 mt-4">
-                {isSignUp ? "Already have an account?" : "Don't have an account?"} 
-                <span
-                  className="text-white cursor-pointer"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                >
-                  {isSignUp ? " Sign In" : " Sign Up"}
-                </span>
-              </p>
-            </CardContent>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-xl rounded-2xl border-0 bg-black text-white">
+        <CardContent className="p-8">
+          <div className="text-center space-y-2 mb-8">
+            <h1 className="text-4xl font-bold text-white mb-2">DocLoc</h1>
+            <p className="text-gray-400 text-lg">Your Data, Your Control</p>
           </div>
-        </div>
-      )}
+
+          <motion.form 
+            initial={{ opacity: 0, y: 10 }} 
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            onSubmit={handleSubmit(onSubmit)} 
+            className="space-y-6"
+          >
+            {!isLogin && (
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-300">Full Name</label>
+                <Input
+                  type="text"
+                  {...register("name", { required: "Name is required" })}
+                  className="h-12 rounded-lg focus-visible:ring-white bg-gray-800 text-white"
+                  placeholder="John Doe"
+                />
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-300">Unique ID</label>
+              <Input
+                type="number"
+                {...register("uid", {
+                  required: "Unique ID is required",
+                  valueAsNumber: true,
+                  validate: value => String(value).length === 12 || "Unique ID must be 12 digits"
+                })}
+                className="h-12 rounded-lg focus-visible:ring-white bg-gray-800 text-white"
+                placeholder="Enter 12-digit UID"
+              />
+              {errors.uid && <p className="text-red-500 text-sm mt-1">{errors.uid.message}</p>}
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-300">Password</label>
+              <Input
+                type="password"
+                {...register("password", { 
+                  required: "Password is required", 
+                  minLength: { value: 8, message: "Must be at least 8 characters" },
+                  pattern: {
+                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                    message: "Must include uppercase, lowercase, number, and special character"
+                  }
+                })}
+                className="h-12 rounded-lg focus-visible:ring-white bg-gray-800 text-white"
+                placeholder="••••••••"
+              />
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+            </div>
+
+            <Button type="submit" className="w-full h-12 rounded-lg bg-white text-black font-semibold text-base hover:bg-gray-300">
+              {isLogin ? "Log In" : "Create Account"}
+            </Button>
+
+            <div className="flex items-center justify-between">
+              <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-sm text-gray-300 hover:text-white font-medium">
+                {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
+              </button>
+              {isLogin && <a href="#" className="text-sm text-gray-400 hover:text-white">Forgot Password?</a>}
+            </div>
+          </motion.form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
