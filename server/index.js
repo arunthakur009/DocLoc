@@ -3,8 +3,8 @@ const { createServer } = require('@vercel/node'); // Vercel specific
 require('dotenv').config();
 
 const connectDB = require('./src/config/db'); // Adjust path if needed
-const userRoutes = require('./src/routes/userRoutes');
-const documentRoutes = require('./src/routes/documentRoutes');
+const userRoutes = require('./src/api/userRoutes');
+const documentRoutes = require('./src/api/documentRoutes');
 
 connectDB();
 
