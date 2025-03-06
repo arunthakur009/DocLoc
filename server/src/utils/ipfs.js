@@ -2,12 +2,12 @@ const { create } = require('ipfs-http-client');
 require('dotenv').config();
 
 const ipfs = create({
-    host: 'ipfs.infura.io',
+    host: 'api.pinata.cloud',
     port: 5001,
     protocol: 'https',
     headers: {
         authorization: `Basic ${Buffer.from(
-            `${process.env.INFURA_PROJECT_ID}:${process.env.INFURA_PROJECT_SECRET}`
+            `${process.env.PINATA_SECRET_API_KEY}:${process.env.PINATA_SECRET_API_KEY}`
         ).toString('base64')}`
     }
 });
