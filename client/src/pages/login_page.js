@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Card , CardContent} from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
-import { motion } from "framer-motion"; // For smooth transitions
+
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
