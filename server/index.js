@@ -2,9 +2,10 @@ const express = require('express');
 const { createServer } = require('@vercel/node'); // Vercel specific
 require('dotenv').config();
 
-const connectDB = require('./src/config/db'); // Adjust path if needed
-const userRoutes = require('./src/api/userRoutes');
-const documentRoutes = require('./src/api/documentRoutes');
+const connectDB = require('./src/config/db.js'); // Adjust path if needed
+const userRoutes = require('./src/api/userRoutes.js');
+const documentRoutes = require('./src/api/documentRoutes.js');
+
 
 connectDB();
 
@@ -17,7 +18,7 @@ app.get('/', (req, res) => {
 });
 
 // Define API routes
-app.use('/api/user', userRoutes);
+app.use('/api/', userRoutes);
 app.use('/api/documents', documentRoutes);
 
 // Export serverless function
