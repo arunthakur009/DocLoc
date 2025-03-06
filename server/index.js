@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 });
 
 // Define API routes
-app.use('/api/users', userRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/documents', documentRoutes);
 
 // Export serverless function
