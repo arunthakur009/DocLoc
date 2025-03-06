@@ -41,7 +41,4 @@
     "node": "18.20.7",
     "npm": "10.8.2"
   },
-  "scripts":{
-    "postinstall": "npm-install -g npm@10.8.2"
-  }
 }
