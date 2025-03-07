@@ -1,4 +1,4 @@
-const Document = require('../models/Document');
+const Document = require('../models/documents');
 const ipfs = require('../utils/ipfs');
 const { contract } = require('../config/blockchain');
 const { encryptData, decryptData } = require('../utils/encryption');
@@ -6,7 +6,7 @@ const { encryptData, decryptData } = require('../utils/encryption');
 exports.uploadDocument = async (req, res) => {
     try {
         const encryptedFile = encryptData(req.file.buffer.toString('hex'), process.env.ENCRYPTION_KEY);
-        const { cid } = await ipfs.add(Buffer.from(encryptedFile));
+        const { cid } = await ipfs.add(Buffer.from(encryptedFile), req.body.docType);
 
         const document = new Document({ userId: req.user._id, docType: req.body.docType, ipfsHash: cid.toString(), verified: false });
         await document.save();
