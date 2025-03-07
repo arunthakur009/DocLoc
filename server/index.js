@@ -1,12 +1,11 @@
 const express = require('express');
-const { createServer } = require('@vercel/node'); // Vercel specific
 require('dotenv').config();
 
-const connectDB = require('./src/config/db.js'); // Adjust path if needed
+const connectDB = require('./src/config/db.js');
 const userRoutes = require('./src/api/userRoutes.js');
 const documentRoutes = require('./src/api/documentRoutes.js');
 
-
+// Connect to database
 connectDB();
 
 const app = express();
@@ -21,6 +20,9 @@ app.get('/', (req, res) => {
 app.use('/api/', userRoutes);
 app.use('/api/documents', documentRoutes);
 
-// Export serverless function
-module.exports = createServer(app);
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 
