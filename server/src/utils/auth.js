@@ -3,6 +3,7 @@ const User = require('../models/user');
 const path = require('path');
 require('dotenv').config();
 
+
 // Import Web3 with fallback for different versions
 const Web3Lib = require('web3');
 const Web3 = Web3Lib.default || Web3Lib;
@@ -141,29 +142,44 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
-// Middleware with optimized blockchain verification
+/**
+ * Generates a JWT token for user authentication
+ * @param {Object} user - User object with required fields
+ * @returns {String} JWT token
+ */
+exports.generateAuthToken = (user) => {
+  const token = jwt.sign(
+    { 
+      _id: user._id.toString(),
+      publicKey: user.publicKey 
+    },
+    process.env.JWT_SECRET || 'your-secret-key-here',
+    { expiresIn: '7d' }
+  );
+  return token;
+};
+
+/**
+ * Authentication middleware for protected routes
+ */
 exports.authMiddleware = async (req, res, next) => {
   try {
-    const token = req.header('Authorization').replace('Bearer ', '');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne({ uid: decoded.uid });
+    const token = req.header('Authorization')?.replace('Bearer ', '');
     
-    if (!user) {
-      throw new Error('User not found');
+    if (!token) {
+      return res.status(401).send({ error: 'Authentication required' });
     }
     
-    // Skip blockchain verification for non-critical endpoints
-    // or use caching to reduce blockchain calls
-    if (req.path.includes('/critical') || Math.random() < 0.1) { // 10% chance to verify
-      const isLoggedIn = await contract.methods.loggedIn(user.publicKey).call();
-      if (!isLoggedIn) {
-        throw new Error('User not logged in on blockchain');
-      }
-    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-here');
     
-    req.user = user;
+    // Add user info to request
+    req.user = {
+      _id: decoded._id,
+      publicKey: decoded.publicKey
+    };
+    
     next();
   } catch (error) {
-    res.status(401).json({ error: 'Authentication failed', details: error.message });
+    res.status(401).send({ error: 'Authentication failed' });
   }
 };

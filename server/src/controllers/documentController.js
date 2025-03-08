@@ -6,9 +6,15 @@ const { encryptData, decryptData } = require('../utils/encryption');
 // Function to upload a document
 exports.uploadDocument = async (req, res) => {
     try {
-        // Make sure user is logged in (contract has isLoggedIn modifier)
+        // Make sure user is logged in
         if (!req.user) {
             return res.status(401).send({ error: 'User not authenticated' });
+        }
+        
+        // Get the user's blockchain key
+        const user = await User.findOne({ publicKey: req.user.publicKey });
+        if (!user || !user.blockchainKey) {
+            return res.status(400).send({ error: 'User blockchain key not found. Please set a key first.' });
         }
         
         // Encrypt the file
@@ -26,19 +32,19 @@ exports.uploadDocument = async (req, res) => {
         });
         await document.save();
         
-        // Get user's key from request
-        const userKey = req.user.key; // Assuming key is stored in user object
-        
-        // Add document to blockchain using the user's key
-        await contract.methods.addDocument(
-            userKey, 
-            cid.toString(), 
+        // Add document to blockchain with the user's key
+        const { addUserDocument } = require('../config/blockchain');
+        await addUserDocument(
+            req.user.publicKey, 
+            user.blockchainKey, // This is the missing key parameter
+            cid.toString(),
             req.body.docType
-        ).send({ from: req.user.publicKey }); // Using user's public key as sender
+        );
         
-        res.send({ document });
+        res.status(201).send({ document });
     } catch (error) {
-        res.status(500).send({ error: error.message });
+        console.error('Document upload error:', error);
+        res.status(400).send({ error: error.message });
     }
 };
 
