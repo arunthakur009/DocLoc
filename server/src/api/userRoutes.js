@@ -8,20 +8,19 @@ const {
 } = require('../controllers/userController');
 const { authMiddleware } = require('../utils/auth');
 
-const app = express();
-app.use(express.json());
+const router = express.Router();
 
 // Basic auth endpoints
-app.post('/signup', signup);
-app.post('/login', login);
+router.post('/signup', signup);
+router.post('/login', login);
 
 // Smart contract related endpoints
-app.post('/set-key', authMiddleware, setKey);
-app.post('/blockchain-login', authMiddleware, blockchainLogin);
-app.post('/blockchain-logout', authMiddleware, blockchainLogout);
+router.post('/set-key', authMiddleware, setKey);
+router.post('/blockchain-login', authMiddleware, blockchainLogin);
+router.post('/blockchain-logout', authMiddleware, blockchainLogout);
 
-app.get('/', (req, res) => {
+router.get('/', (req, res) => {
   res.json({ message: 'User API is working!' });
 });
 
-module.exports = app;
+module.exports = router;
