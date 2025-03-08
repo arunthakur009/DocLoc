@@ -88,3 +88,4 @@ const KeySetup = ({ onSetKey, buttonText = "Set Key" }) => {
   );
 };
 
+export default KeySetup;

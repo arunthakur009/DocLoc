@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
+import { authAPI } from '../api/api';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,8 +17,9 @@ const Login = () => {
     setError('');
 
     try {
-      const endpoint = isLogin ? '/api/login' : '/api/signup';
-      const response = await axios.post(endpoint, { uid });
+      const response = isLogin 
+        ? await authAPI.login(uid)
+        : await authAPI.signup(uid);
       
       // Store token and user info in localStorage
       localStorage.setItem('token', response.data.token);

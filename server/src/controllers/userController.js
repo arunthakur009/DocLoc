@@ -39,3 +39,36 @@ exports.login = async (req, res) => {
         res.status(400).send({ error: error.message });
     }
 };
+
+exports.setKey = async (req, res) => {
+    try {
+        const { uid } = req.user;
+        // Add your key setting logic here
+        
+        res.status(200).send({ message: 'Key set successfully' });
+    } catch (error) {
+        res.status(400).send({ error: error.message });
+    }
+};
+
+exports.blockchainLogin = async (req, res) => {
+    try {
+        const { uid } = req.user;
+        // Add your blockchain login logic here
+        
+        res.status(200).send({ message: 'Blockchain login successful' });
+    } catch (error) {
+        res.status(400).send({ error: error.message });
+    }
+};
+
+exports.blockchainLogout = async (req, res) => {
+    try {
+        const { uid } = req.user;
+        // Add your blockchain logout logic here
+        
+        res.status(200).send({ message: 'Blockchain logout successful' });
+    } catch (error) {
+        res.status(400).send({ error: error.message });
+    }
+};
