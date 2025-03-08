@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models/user');
 const { generateAuthToken } = require('../utils/auth');
 const { web3 } = require('../config/blockchain');
 const { encryptData } = require('../utils/encryption');

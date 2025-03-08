@@ -1,23 +1,28 @@
-const Web3Lib = require('web3');
-const Web3 = Web3Lib.default || Web3Lib;
-require('dotenv').config();
-
-// Mock ABI to prevent breaking when contractABI.json is not available
-const contractABI = (() => {
+// Add this to your existing module.exports
+module.exports.loginUser = async (address, key) => {
     try {
-        return require('../contractABI.json');
+      const gasEstimate = await contract.methods.login(key).estimateGas({ from: address });
+      const result = await contract.methods.login(key).send({ 
+        from: address, 
+        gas: Math.floor(gasEstimate * 1.2) // 20% buffer
+      });
+      return result;
     } catch (error) {
-        console.warn('contractABI.json not found, using empty ABI instead');
-        return []; // Empty ABI as fallback
+      console.error('Error logging in:', error.message);
+      throw error;
     }
-})();
-
-const providerUrl = `https://${process.env.NETWORK}.infura.io/v3/${process.env.INFURA_PROJECT_ID}`;
-const web3 = new Web3(providerUrl);
-
-const contract = new web3.eth.Contract(
-        contractABI,
-        process.env.CONTRACT_ADDRESS
-);
-
-module.exports = { web3, contract };
+  };
+  
+  module.exports.addUserDocument = async (address, key, cid, docType) => {
+    try {
+      const gasEstimate = await contract.methods.addDocument(key, cid, docType).estimateGas({ from: address });
+      const result = await contract.methods.addDocument(key, cid, docType).send({ 
+        from: address, 
+        gas: Math.floor(gasEstimate * 1.2)
+      });
+      return result;
+    } catch (error) {
+      console.error('Error adding document:', error.message);
+      throw error;
+    }
+  };

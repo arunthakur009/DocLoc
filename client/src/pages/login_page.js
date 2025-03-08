@@ -1,110 +1,84 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { motion } from "framer-motion";
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import './login.css';
 
-import { Card , CardContent} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-
-
-export default function AuthForm() {
+const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const [uid, setUid] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const generateUID = () => {
-    return Math.floor(100000000000 + Math.random() * 900000000000); // Generate 12-digit number
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-  const onSubmit = async (data) => {
     try {
-      const endpoint = isLogin ? "/api/login" : "/api/signup";
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await response.json();
-      console.log("Server Response:", result);
-    } catch (error) {
-      console.error("Error submitting form:", error);
+      const endpoint = isLogin ? '/api/login' : '/api/signup';
+      const response = await axios.post(endpoint, { uid });
+      
+      // Store token and user info in localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      // If login successful, redirect to main app
+      navigate('/app');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Something went wrong');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl rounded-2xl border-0 bg-black text-white">
-        <CardContent className="p-8">
-          <div className="text-center space-y-2 mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">DocLoc</h1>
-            <p className="text-gray-400 text-lg">Your Data, Your Control</p>
+    <div className="login-container">
+      <div className="login-card">
+        <h1 className="login-title">Document Locker</h1>
+        <h2>{isLogin ? 'Login' : 'Create Account'}</h2>
+        
+        {error && <div className="error-message">{error}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="uid">User ID</label>
+            <input
+              type="text"
+              id="uid"
+              value={uid}
+              onChange={(e) => setUid(e.target.value)}
+              required
+              placeholder="Enter your unique ID"
+            />
           </div>
-
-          <motion.form 
-            initial={{ opacity: 0, y: 10 }} 
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            onSubmit={handleSubmit(onSubmit)} 
-            className="space-y-6"
+          
+          <button 
+            type="submit" 
+            className="submit-button"
+            disabled={loading}
           >
-            {!isLogin && (
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-300">Full Name</label>
-                <Input
-                  type="text"
-                  {...register("name", { required: "Name is required" })}
-                  className="h-12 rounded-lg focus-visible:ring-white bg-gray-800 text-white"
-                  placeholder="John Doe"
-                />
-                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-              </div>
-            )}
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-300">Unique ID</label>
-              <Input
-                type="number"
-                {...register("uid", {
-                  required: "Unique ID is required",
-                  valueAsNumber: true,
-                  validate: value => String(value).length === 12 || "Unique ID must be 12 digits"
-                })}
-                className="h-12 rounded-lg focus-visible:ring-white bg-gray-800 text-white"
-                placeholder="Enter 12-digit UID"
-              />
-              {errors.uid && <p className="text-red-500 text-sm mt-1">{errors.uid.message}</p>}
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-300">Password</label>
-              <Input
-                type="password"
-                {...register("password", { 
-                  required: "Password is required", 
-                  minLength: { value: 8, message: "Must be at least 8 characters" },
-                  pattern: {
-                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                    message: "Must include uppercase, lowercase, number, and special character"
-                  }
-                })}
-                className="h-12 rounded-lg focus-visible:ring-white bg-gray-800 text-white"
-                placeholder="••••••••"
-              />
-              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
-            </div>
-
-            <Button type="submit" className="w-full h-12 rounded-lg bg-white text-black font-semibold text-base hover:bg-gray-300">
-              {isLogin ? "Log In" : "Create Account"}
-            </Button>
-
-            <div className="flex items-center justify-between">
-              <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-sm text-gray-300 hover:text-white font-medium">
-                {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In"}
-              </button>
-              {isLogin && <a href="#" className="text-sm text-gray-400 hover:text-white">Forgot Password?</a>}
-            </div>
-          </motion.form>
-        </CardContent>
-      </Card>
+            {loading ? 'Processing...' : isLogin ? 'Login' : 'Sign Up'}
+          </button>
+        </form>
+        
+        <p className="switch-mode">
+          {isLogin ? "Don't have an account? " : "Already have an account? "}
+          <button 
+            onClick={() => setIsLogin(!isLogin)}
+            className="switch-button"
+          >
+            {isLogin ? 'Sign Up' : 'Login'}
+          </button>
+        </p>
+        
+        <div className="info-text">
+          <p>This secure document storage uses blockchain technology</p>
+          <p>Your documents are encrypted and stored on IPFS</p>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default Login;
