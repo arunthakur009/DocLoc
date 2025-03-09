@@ -5,7 +5,7 @@ A decentralized and secure document storage system using Blockchain, IPFS (Pinat
 
 
 Features 
-✅ User Authentication → Secure login using unique UID (stored in MongoDB).
+✅ User Authentication → Secure login using unique UID(private key)(stored in MongoDB).
 ✅ Blockchain Integration → Smart contract stores document hashes for verification.
 ✅ Decentralized Storage → Documents stored on IPFS (Pinata) instead of centralized servers.
 ✅ Smart Contract Verification → Ensures document integrity and authenticity.
@@ -71,7 +71,7 @@ npm start
 
 
 
-Sign Up & Login with your UID.
+Sign Up & Login with your UID(private key).
 2️⃣ Upload a Document → It gets stored on IPFS (Pinata), and its hash is added to Ethereum Smart Contract.
 3️⃣ Retrieve Documents → The app fetches the document hash from blockchain and retrieves the file from Pinata.
 4️⃣ Verify Authenticity → The hash is compared with blockchain records to ensure data integrity.
